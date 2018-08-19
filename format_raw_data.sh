@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Extract TMK column only into separate CSV for future use
-cut -d ',' -f 2 raw.csv > tmp.csv &&
+cut -d ',' -f 2 raw_example.csv > tmp.csv &&
 # Move temporary file to formatted file
 cat tmp.csv > formatted.csv &&
 # Sort the TMKs in order of lowest to highest
