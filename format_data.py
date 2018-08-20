@@ -1,17 +1,21 @@
+import urllib2
 import os
 import csv
 import operator
 
-raw_data = 'raw_example.csv'
 tmk_data = 'tmks.csv'
 tmk_zone = 'tmks_zone_'
+gis_url = 'https://opendata.arcgis.com/datasets/1eb5fa03038d49cba930096ea67194e0_5.csv'
 
 # Separate raw parcel data into sorted TMK CSV files, separated by zone
-with open(raw_data) as r, open(tmk_data, 'w') as w:
+with open(tmk_data, 'w') as w:
+
+	# Download latest GIS data
+    r = urllib2.urlopen(gis_url)
 
     # Create writer/reader objects
-    writer = csv.writer(w)
     reader = csv.reader(r)
+    writer = csv.writer(w)
     
     # Write each TMK value to CSV, formatted w/out state code and 4-digit suffix
     sortedlist = sorted(reader, key=operator.itemgetter(1), reverse=False)
