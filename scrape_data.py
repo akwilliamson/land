@@ -1,5 +1,10 @@
 import urllib2
 from bs4 import BeautifulSoup
+import csv
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 url = 'http://qpublic9.qpublic.net/hi_hawaii_display.php?county=hi_hawaii&KEY=950260110000'
 page = urllib2.urlopen(url)
@@ -72,7 +77,9 @@ else:
 for value in values:
     print(value)
 
-
+with open('records.csv', 'a') as records:
+    writer = csv.writer(records, delimiter=',')
+    writer.writerow(values)
 
 
 
