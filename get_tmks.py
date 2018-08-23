@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import urllib2
 import os
 import csv
@@ -32,8 +34,3 @@ with open(tmk_data, 'w') as w:
         filename = tmk_zone + number + ".csv"
         with open(filename,'a') as f:
             f.write(row)
-
-
-    with open('records.csv', 'wt') as records:
-        writer = csv.writer(records, delimiter=',')
-        writer.writerow(['name', 'address', 'state', 'zip', 'property class', 'acres', 'market land value', 'assessed building value', 'total taxable value', 'tax year', 'total taxes'])
