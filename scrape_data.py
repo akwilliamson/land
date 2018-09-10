@@ -26,12 +26,13 @@ with open(file_name, 'r') as tmk_file:
             page = urllib2.urlopen(url)
             html = BeautifulSoup(page, 'html.parser')
             values = [tmk[0]]
-            print("parsing")
-
             tables = html.find_all('table', attrs={'class': 'table_class'})
 
             # Extract Owner Information
+            if len(tables) == 1:
+                print('record data currently unavailable for', tmk[0])
             if len(tables) >= 10:
+                print('parsing found record')
                 owner_info_table = tables[2]
 
                 owner_header_rows = owner_info_table.find_all('td', attrs={'class': 'owner_header'})
@@ -103,7 +104,6 @@ with open(file_name, 'r') as tmk_file:
 
                 if values[-4] == '0':
                     values[-4] = ""
-
                 dict_writer.writerow({'tmk': values[0], 'name': values[1], 'address': values[2], 'state': values[3], 'zip': values[4], 'property class': values[5], 'acres': values[6], 'market land value': values[7], 'assessed building value': values[8], 'total taxable value': values[9], 'tax year': values[10], 'total taxes': values[11]})
 
 
