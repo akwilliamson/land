@@ -20,8 +20,9 @@ with open(file_name, 'r') as tmk_file:
         dict_writer = csv.DictWriter(records, fieldnames=field_names)
         tmks = csv.reader(tmk_file, delimiter=',')
         dict_writer.writeheader()
-
+        count = 0
         for tmk in tmks:
+            count += 1
             url = base_url + tmk[0]
             page = urllib2.urlopen(url)
             html = BeautifulSoup(page, 'html.parser')
@@ -30,9 +31,9 @@ with open(file_name, 'r') as tmk_file:
 
             # Extract Owner Information
             if len(tables) == 1:
-                print('record data currently unavailable for', tmk[0])
+                print 'record data unavailable for: ' + tmk[0]
             if len(tables) >= 10:
-                print('parsing found record')
+                print 'parsing record ' + str(count) + ': ' + tmk[0]
                 owner_info_table = tables[2]
 
                 owner_header_rows = owner_info_table.find_all('td', attrs={'class': 'owner_header'})
@@ -51,7 +52,7 @@ with open(file_name, 'r') as tmk_file:
                                 place = address_components[0]
                                 location = address_components[1].split(' ')
                                 state = location[1]
-                                zip_code = location[2]
+                                zip_code = full_address.split(' ')[-1].strip()
                                 values.extend([place, state, zip_code])
                             else:
                                 values.extend([address_components, "", ""])
