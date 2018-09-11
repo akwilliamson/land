@@ -51,7 +51,7 @@ with open(file_name, 'r') as tmk_file:
                             if len(address_components) > 1:
                                 place = address_components[0]
                                 location = address_components[1].split(' ')
-                                state = location[1]
+                                state = full_address.split(' ')[-2].strip()
                                 zip_code = full_address.split(' ')[-1].strip()
                                 values.extend([place, state, zip_code])
                             else:
