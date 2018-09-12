@@ -85,7 +85,7 @@ with open(file_name, 'r') as tmk_file:
                         pass
 
 
-                tax_info_table = tables[10]
+                tax_info_table = tables[-3]
 
                 tax_info_data = tax_info_table.find_all('td', attrs={'class': 'sales_value'})
                 earliest_year = tax_info_data[0].text.strip()
