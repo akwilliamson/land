@@ -41,7 +41,6 @@ with open(file_name, 'r') as tmk_file:
 
                 for index, owner_header_row in enumerate(owner_header_rows, start = 0):
                     owner_header_text = owner_header_row.text.strip()
-                    
                     if owner_header_text == 'Owner Name':
                         values.append(owner_value_rows[index].text.strip())
                     elif owner_header_text == 'Mailing Address':
@@ -58,7 +57,7 @@ with open(file_name, 'r') as tmk_file:
                                 values.extend([address_components, "", ""])
                         else:
                             values.extend(["", "", ""])
-                    elif owner_header_text == 'Property Class':
+                    elif owner_header_text == 'Property Class' or owner_header_text == 'Property Type':
                         values.append(owner_value_rows[index].text.strip())
                     elif owner_header_text == 'Land Area (acres)':
                         values.append(owner_value_rows[index].text.strip())
