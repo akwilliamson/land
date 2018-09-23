@@ -1,36 +1,37 @@
 #!/usr/bin/python
 
+# Extract raw parcel data from ARC GIS and parse into sorted TMK lists within CSV files separated by TMK zone
+
 import urllib2
-import os
 import csv
-import operator
+from operator import itemgetter
+import pandas as pd
 
-tmk_data = 'tmks.csv'
-tmk_zone = 'tmks_zone_'
-gis_url = 'https://opendata.arcgis.com/datasets/1eb5fa03038d49cba930096ea67194e0_5.csv'
+print('downloading raw data...')
 
-# Separate raw parcel data into sorted TMK CSV files, separated by zone
-with open(tmk_data, 'w') as w:
+# Download latest GIS data
+raw_data = urllib2.urlopen('https://opendata.arcgis.com/datasets/1eb5fa03038d49cba930096ea67194e0_5.csv')
 
-	# Download latest GIS data
-    r = urllib2.urlopen(gis_url)
+if raw_data.getcode() == 200:
+    print('raw data downloaded successfully')
+else:
+    print('raw data download error. Try again')
+    quit()
 
-    # Create writer/reader objects
-    reader = csv.reader(r)
-    writer = csv.writer(w)
-    
-    # Write each TMK value to CSV, formatted w/out state code and 4-digit suffix
-    sortedlist = sorted(reader, key=operator.itemgetter(1), reverse=False)
-    for row in sortedlist:
-        writer.writerow([row[1][1:]+'0000'])
+# Store tmk list
+print('extracting tmk values...')
+tmks = pd.read_csv(raw_data).tmk
+sorted_tmks = sorted(tmks)
+print('extraction complete')
 
-    # 
-    with open (tmk_data) as f:
-        r = f.readlines()
+# Write each TMK value to `tmk.csv` file, formatted without state code and 4-digit suffix
+with open('tmks.csv', 'w') as tmks_file:
 
-    for i in range(len(r)):
-        row = r[i]
-        number = r[i].split(',')[0][0]
-        filename = tmk_zone + number + ".csv"
-        with open(filename,'a') as f:
-            f.write(row)
+    csv_writer = csv.writer(tmks_file)
+
+    print('formatting tmks...')
+    for row in sorted_tmks:
+        formatted_tmk = str(row)[1:]+'0000'
+        csv_writer.writerow([formatted_tmk])
+
+print('formatting complete. all tmks stored in `tmk.csv` file')
