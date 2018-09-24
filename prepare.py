@@ -31,6 +31,9 @@ with open('tmks.csv', 'w') as tmks_file:
 
     print('formatting tmks...')
     for row in sorted_tmks:
+        # If last 3 digits of TMK is '999' then skip it. It's not valid
+        if row % 1000 == 999:
+            continue
         formatted_tmk = str(row)[1:]+'0000'
         csv_writer.writerow([formatted_tmk])
 

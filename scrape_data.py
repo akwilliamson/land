@@ -14,6 +14,8 @@ record_file_name = 'records_zone_' + str(zone_num) + '.csv'
 base_url = 'http://qpublic9.qpublic.net/hi_hawaii_display.php?county=hi_hawaii&KEY='
 field_names = ['tmk', 'name', 'address', 'state', 'zip', 'property class', 'acres', 'market land value', 'assessed building value', 'total taxable value', 'tax year', 'total taxes']
 
+
+
 with open(file_name, 'r') as tmk_file:
 
     with open(record_file_name, 'w') as records:
@@ -105,12 +107,3 @@ with open(file_name, 'r') as tmk_file:
                 if values[-4] == '0':
                     values[-4] = ""
                 dict_writer.writerow({'tmk': values[0], 'name': values[1], 'address': values[2], 'state': values[3], 'zip': values[4], 'property class': values[5], 'acres': values[6], 'market land value': values[7], 'assessed building value': values[8], 'total taxable value': values[9], 'tax year': values[10], 'total taxes': values[11]})
-
-
-
-
-
-
-
-
-
