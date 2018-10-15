@@ -7,6 +7,12 @@ import csv
 from operator import itemgetter
 import pandas as pd
 
+tmk_zone = 'tmks_zone_'
+
+print('*********************************')
+print('*** PREPARING THE DATA STUFFS ***')
+print('*********************************\n')
+
 print('downloading raw data...')
 
 # Download latest GIS data
@@ -37,4 +43,17 @@ with open('tmks.csv', 'w') as tmks_file:
         formatted_tmk = str(row)[1:]+'0000'
         csv_writer.writerow([formatted_tmk])
 
-print('formatting complete. all tmks stored in `tmk.csv` file')
+    with open ('tmks.csv') as f:
+        r = f.readlines()
+
+    for i in range(len(r)):
+        row = r[i]
+        number = r[i].split(',')[0][0]
+        filename = tmk_zone + number + ".csv"
+        with open(filename,'a') as f:
+            f.write(row)
+
+print('\n**************************')
+print('*** PREP WORK COMPLETE ***')
+print('**************************\n')
+print ('CSVs have been created for each zone. You can now run `python attack.py` to parse a specific zone')
