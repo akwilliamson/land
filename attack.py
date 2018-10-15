@@ -142,6 +142,9 @@ with open(filename, 'w') as records:
             else:
                 first_name = name_components[0]
 
+            if (first_name.upper() == 'UNITED STATES OF AMERICA') or (first_name.upper() == 'STATE OF HAWAII'):
+                continue
+
 ### ASSESSMENT INFORMATION
 
             assessment_info = soup.find(string=re.compile('Assessment Information'))
