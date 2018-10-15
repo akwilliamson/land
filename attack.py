@@ -7,23 +7,31 @@ import re
 import unicodedata
 import sys
 
-field_names = ['tmk', 'first name', 'last name', 'address', 'state', 'zip', 'acres', 'class', 'assessed value', 'tax year', 'taxes owed']
+field_names = ['tmk', 'acres', 'property class', 'first name', 'last name', 'street', 'city', 'state', 'zip code', 'taxable value', 'tax year', 'taxes owed']
 
 state_abbreviations = ['AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MH', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'MP', 'OH', 'OK', 'OR', 'PW', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VI', 'VA', 'WA', 'WV', 'WI', 'WY' ]
 
 total = 0
 
-zone = raw_input("pick a zone number to attack (1-9):\n")
-should_filter_homeowner = raw_input("do you want to filter out parcels with a 'HOMEOWNER' property class? y/n\n")
-should_filter_buildings = raw_input("do you want to filter out parcels that contain 'assessed building value'? y/n\n")
+zone = raw_input("pick a zone number to attack (1-9):\n").strip()
+should_filter_homeowner = raw_input("do you want to filter out parcels with a 'HOMEOWNER' property class? y/n\n").strip()
+should_filter_buildings = raw_input("do you want to filter out parcels that contain 'assessed building value'? y/n\n").strip()
 
-should_filter_back_taxes = raw_input("do you want to filter out parcels that don't owe back taxes? y/n\n")
+should_filter_taxable_range = raw_input("do you want to include parcels with a certain 'total taxable value' range? y/n\n").strip()
+taxable_range_minimum = ''
+taxable_range_maximum = ''
+
+if should_filter_taxable_range.lower() == 'y':
+    taxable_range_minimum = raw_input("ignore parcels with a 'total taxable value' less than :\n").strip()
+    taxable_range_maximum = raw_input("ignore parcels with a 'total taxable value' greater than:\n").strip()
+
+should_filter_back_taxes = raw_input("do you want to filter out parcels that don't owe back taxes? y/n\n").strip()
 back_tax_minimum = ''
 back_tax_maximum = ''
 
 if should_filter_back_taxes.lower() == 'y':
-    back_tax_minimum = raw_input("ignore parcels with back taxes owed that are less than:\n")
-    back_tax_maximum = raw_input("ignore parcels with back taxes owed that are greater than:\n")
+    back_tax_minimum = raw_input("ignore parcels with back taxes owed that are less than :\n").strip()
+    back_tax_maximum = raw_input("ignore parcels with back taxes owed that are greater than:\n").strip()
 
 def is_valid_zip(value):
   try:
@@ -43,16 +51,20 @@ def drawProgressBar(percent, barLen = 20):
     sys.stdout.write("[ %s ] %.3f%%" % (progress, percent * 100))
     sys.stdout.flush()
 
-with open('tmks.csv', 'r') as tmks_csv:
+zone_file = 'tmks_zone_' + zone + '.csv'
+
+with open(zone_file, 'r') as tmks_csv:
     tmks = csv.reader(tmks_csv, delimiter=',')
     total = len(list(tmks))
 
 # Create `records.csv` and write column headers. This file will ultimately store all the filtered records
-with open('records.csv', 'w') as records:
-    writer = csv.writer(records)
-    writer.writerow(field_names)
+filename = 'records_zone_' + zone + '.csv'
+with open(filename, 'w') as records:
 
-    with open('tmks.csv', 'r') as tmks_csv:
+    writer = csv.DictWriter(records, fieldnames=field_names)
+    writer.writeheader()
+
+    with open(zone_file, 'r') as tmks_csv:
         tmks = csv.reader(tmks_csv, delimiter=',')
 
         count = 0
@@ -128,7 +140,6 @@ with open('records.csv', 'w') as records:
                 last_name = name_components[0]
                 first_name = name_components[1]
             else:
-                last_name = ''
                 first_name = name_components[0]
 
 ### ASSESSMENT INFORMATION
@@ -158,10 +169,9 @@ with open('records.csv', 'w') as records:
                 continue
 
             ## total taxable value
-            total_taxable_value = assessment_values[-1].text.strip().strip('$').strip()
-            if should_filter_back_taxes.lower() == 'y':
-                if (float(total_taxable_value) < float(back_tax_minimum)) or (float(total_taxable_value) > float(back_tax_maximum)):
-                    continue
+            total_taxable_value = assessment_values[-1].text.strip().strip('$').strip().replace(',','')
+            if (float(total_taxable_value) < float(taxable_range_minimum)) or (float(total_taxable_value) > float(taxable_range_maximum)):
+                continue
 
 ### TAX INFORMATION
 
@@ -177,5 +187,8 @@ with open('records.csv', 'w') as records:
             ## taxes owed
             raw_taxes_owed = table_tax_info.find(lambda tag:tag.name=="b" and "$" in tag.text).text
             taxes_owed = raw_taxes_owed.replace(',','').strip()[1:].strip()
+            if should_filter_back_taxes.lower() == 'y':
+                if (float(taxes_owed) < float(back_tax_minimum)) or (float(taxes_owed) > float(back_tax_maximum)):
+                    continue
 
-            print str(tmk[0]) + ', ' + acres + ', ' + property_class + ', ' + first_name + ', ' + last_name + ', ' + street + ', ' + city + ', ' + state_abbreviation + ', ' + zip_code + ', ' + total_taxable_value + ', ' + tax_year + ', ' + taxes_owed
+            writer.writerow({'tmk': str(tmk[0]), 'acres': acres, 'property class': property_class, 'first name': first_name, 'last name': last_name, 'street': street, 'city': city, 'state': state_abbreviation, 'zip code': zip_code, 'taxable value': total_taxable_value, 'tax year': tax_year, 'taxes owed': taxes_owed})
