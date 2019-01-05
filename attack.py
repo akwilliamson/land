@@ -28,7 +28,9 @@ should_filter_homeowner = raw_input("do you want to filter out parcels with a 'H
 should_filter_buildings = raw_input("do you want to filter out parcels that contain 'assessed building value'? y/n\n").strip()
 # Choice to contain parcels within a specific taxable value range
 should_filter_taxable_range = raw_input("do you want to include parcels with a certain 'total taxable value' range? y/n\n").strip()
+# A default minimum taxable range if none is given
 taxable_range_minimum = '0'
+# A default maximum taxable range if none is given
 taxable_range_maximum = '1000000'
 
 if should_filter_taxable_range.lower() == 'y':
@@ -84,6 +86,7 @@ with open(filename, 'w') as records:
 
         for tmk in tmks:
             print tmk
+
             # get HTML for tmk record
             data = urllib2.urlopen('http://qpublic9.qpublic.net/hi_hawaii_display.php?county=hi_hawaii&KEY=' + tmk[0])
             soup = BeautifulSoup(data, 'html.parser')
@@ -175,6 +178,7 @@ with open(filename, 'w') as records:
 
             ## property class
             property_class = assessment_values[1].text.strip()
+
             if should_filter_homeowner.lower() == 'n':
                 if (property_class != 'AGRICULTURAL') and (property_class != 'RESIDENTIAL') and (property_class != 'HOMEOWNER'):
                     continue
@@ -191,6 +195,23 @@ with open(filename, 'w') as records:
             total_taxable_value = assessment_values[-1].text.strip().strip('$').encode('utf-8').strip().replace(',','')
             if (float(total_taxable_value) < float(taxable_range_minimum)) or (float(total_taxable_value) > float(taxable_range_maximum)):
                 continue
+
+### SALES INFORMATION
+
+            sale_date = ''
+            sale_amount = ''
+
+            sales_info = soup.find(string=re.compile('Sales Information'))
+            table_sales_info = sales_info.find_parent('table')
+
+            # Grab the most recent sale of the property and the amount
+            sales_values = table_sales_info.findChildren('td', attrs={'class': 'sales_value'})
+            if len(sales_values) == 1:
+                sale_date = "No Sale Data"
+                sale_amount = "No Sale Data"
+            else:
+                sale_date = sales_values[0].text.strip()
+                sale_amount = sales_values[1].text.strip()
 
 ### TAX INFORMATION
 

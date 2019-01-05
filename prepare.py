@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/local/bin/python
 
 # Extract raw parcel data from ARC GIS and parse into sorted TMK lists within CSV files separated by TMK zone
 
@@ -9,7 +9,7 @@ import pandas as pd
 
 tmk_zone = 'tmks_zone_'
 
-print('*********************************')
+print('\n*********************************')
 print('*** PREPARING THE DATA STUFFS ***')
 print('*********************************\n')
 
