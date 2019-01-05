@@ -7,16 +7,26 @@ import re
 import unicodedata
 import sys
 
-field_names = ['tmk', 'acres', 'property class', 'first name', 'last name', 'street', 'city', 'state', 'zip code', 'taxable value', 'tax year', 'taxes owed']
+### DEFAULT VALUES
 
+# The titles of each column
+field_names = ['tmk', 'acres', 'property class', 'first name', 'last name', 'street', 'city', 'state', 'zip code', 'taxable value', 'tax year', 'taxes owed', 'sale date', 'sale amount']
+# Reference to contain parcels to owners living only in the USA
 state_abbreviations = ['AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL', 'GA', 'GU', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MH', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'MP', 'OH', 'OK', 'OR', 'PW', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VI', 'VA', 'WA', 'WV', 'WI', 'WY' ]
-
+# Reference to parsed records for displaying progress bar
 total = 0
 
-zone = raw_input("pick a zone number to attack (1-9):\n").strip()
-should_filter_homeowner = raw_input("do you want to filter out parcels with a 'HOMEOWNER' property class? y/n\n").strip()
-should_filter_buildings = raw_input("do you want to filter out parcels that contain 'assessed building value'? y/n\n").strip()
+### USER INPUTS
 
+# Choice to parse a specific zone number
+zone = raw_input("pick a zone number to attack (1-9):\n").strip()
+# The file name to output parsed records to the specified zone
+zone_file = 'tmks_zone_' + zone + '.csv'
+# Choice to ignore "HOMEOWNER" parcel type
+should_filter_homeowner = raw_input("do you want to filter out parcels with a 'HOMEOWNER' property class? y/n\n").strip()
+# Choice to ignore parcels with buildings
+should_filter_buildings = raw_input("do you want to filter out parcels that contain 'assessed building value'? y/n\n").strip()
+# Choice to contain parcels within a specific taxable value range
 should_filter_taxable_range = raw_input("do you want to include parcels with a certain 'total taxable value' range? y/n\n").strip()
 taxable_range_minimum = ''
 taxable_range_maximum = ''
@@ -24,7 +34,7 @@ taxable_range_maximum = ''
 if should_filter_taxable_range.lower() == 'y':
     taxable_range_minimum = raw_input("ignore parcels with a 'total taxable value' less than :\n").strip()
     taxable_range_maximum = raw_input("ignore parcels with a 'total taxable value' greater than:\n").strip()
-
+# Choice to ignore parcels that don't have any bax taxes
 should_filter_back_taxes = raw_input("do you want to filter out parcels that don't owe back taxes? y/n\n").strip()
 back_tax_minimum = ''
 back_tax_maximum = ''
@@ -33,13 +43,9 @@ if should_filter_back_taxes.lower() == 'y':
     back_tax_minimum = raw_input("ignore parcels with back taxes owed that are less than :\n").strip()
     back_tax_maximum = raw_input("ignore parcels with back taxes owed that are greater than:\n").strip()
 
-def is_valid_zip(value):
-  try:
-    float(value) and len(value) == 5
-    return True
-  except:
-    return False
+### HELPER METHODS
 
+# Manages the drawing of the progress bar in the Terminal
 def drawProgressBar(percent, barLen = 20):
     sys.stdout.write("\r")
     progress = ""
@@ -51,8 +57,15 @@ def drawProgressBar(percent, barLen = 20):
     sys.stdout.write("[ %s ] %.3f%%" % (progress, percent * 100))
     sys.stdout.flush()
 
-zone_file = 'tmks_zone_' + zone + '.csv'
+# Checks that an owner's address zip code is a valid USA zip code
+def is_valid_zip(value):
+  try:
+    float(value) and len(value) == 5
+    return True
+  except:
+    return False
 
+# Sets the initial `tmks` and `total` values before parsing begins
 with open(zone_file, 'r') as tmks_csv:
     tmks = csv.reader(tmks_csv, delimiter=',')
     total = len(list(tmks))
@@ -194,4 +207,4 @@ with open(filename, 'w') as records:
                 if (float(taxes_owed) < float(back_tax_minimum)) or (float(taxes_owed) > float(back_tax_maximum)):
                     continue
 
-            writer.writerow({'tmk': str(tmk[0]), 'acres': acres, 'property class': property_class, 'first name': first_name, 'last name': last_name, 'street': street, 'city': city, 'state': state_abbreviation, 'zip code': zip_code, 'taxable value': total_taxable_value, 'tax year': tax_year, 'taxes owed': taxes_owed})
+            writer.writerow({'tmk': str(tmk[0]), 'acres': acres, 'property class': property_class, 'first name': first_name, 'last name': last_name, 'street': street, 'city': city, 'state': state_abbreviation, 'zip code': zip_code, 'taxable value': total_taxable_value, 'tax year': tax_year, 'taxes owed': taxes_owed, 'sale date': sale_date, 'sale amount': sale_amount})
