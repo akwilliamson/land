@@ -167,6 +167,9 @@ with open(filename, 'w') as records:
 ### ASSESSMENT INFORMATION
 
             assessment_info = soup.find(string=re.compile('Assessment Information'))
+            if assessment_info is None:
+                print('NO ASSESSMENT INFO')
+                continue
             table_assessment_info = assessment_info.find_parent('table')
 
             # If the record has more than one property class, skip it
