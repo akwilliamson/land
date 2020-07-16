@@ -38,13 +38,15 @@ with open('crook.csv', 'w') as csvfile:
             value_array.append(taxlot_number[0].text)
             value_array.append(taxlot_number_string)
 
-            for bad_tag in name_and_address_raw[0].find_all(['span', 'img', 'a', 'strong']):
+            name_and_address_raw = left_column[0].find(string="Mailing To:").parent.parent
+
+            for bad_tag in name_and_address_raw.find_all(['span', 'img', 'a', 'strong']):
                 bad_tag.decompose()
 
-            for br_tag in name_and_address_raw[0].find_all('br'):
+            for br_tag in name_and_address_raw.find_all('br'):
                 br_tag.replace_with('*')
 
-            name_and_address = name_and_address_raw[0].get_text(strip=True)
+            name_and_address = name_and_address_raw.get_text(strip=True)
             
             value_array.append(name_and_address)
 
@@ -82,4 +84,4 @@ with open('crook.csv', 'w') as csvfile:
                 string = value
                 value_array.append(string)
 
-            deschutes_writer.writerow(value_array)
+            crook_writer.writerow(value_array)
